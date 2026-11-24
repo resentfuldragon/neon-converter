@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Build output (the .exe is published as a GitHub Release, not committed)
+build/
+dist/
+*.spec
+
+# Local junk
+*.log
+.DS_Store
+Thumbs.db

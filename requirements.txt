@@ -1,0 +1,10 @@
+customtkinter>=5.2
+tkinterdnd2>=0.4
+Pillow>=11.0
+pillow-heif>=0.18
+PyMuPDF>=1.26
+pymupdf4llm>=0.2
+pdf2docx>=0.5.8
+mobi>=0.3.3
+pypandoc_binary>=1.13
+imageio-ffmpeg>=0.5
