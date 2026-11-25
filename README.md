@@ -77,9 +77,18 @@ Metadata is all a tool can remove: what a picture shows (faces, places, reflecti
 
 ## Download
 
-Grab `NeonConverter-windows.zip` from the [Releases](../../releases) page, unzip it anywhere and run
-`NeonConverter.exe`. To get Start-menu, Desktop and Send-to shortcuts, run `install.ps1` from the repo
-with `-Source` pointing at the unzipped folder.
+Grab `NeonConverter-windows.zip` from the [Releases](../../releases) page and unzip it (right-click →
+**Extract All** — running it from inside the zip doesn't work). Then either:
+
+- **Install it** — double-click **Install** in the unzipped folder. It copies the app into your user's
+  Programs folder, adds Start-menu, Desktop and right-click **Send to** shortcuts, and lists Neon Converter
+  under **Settings → Apps**, where you can uninstall it (which also removes its settings and log). No admin
+  rights needed, and installing a newer version over an older one keeps your settings.
+- **Or run it portable** — just double-click `NeonConverter.exe` in the unzipped folder.
+
+The app isn't code-signed, so the first time Windows may say *"Windows protected your PC"*: click
+**More info → Run anyway**. The installer clears Windows' "downloaded from the internet" mark on the
+installed copy, so the warning doesn't come back on every launch.
 
 **Everything is built in** — FFmpeg, Pandoc, MuPDF and Calibre's e-book engine (for MOBI/AZW3) ship inside
 the app, so there is nothing else to install. Because of that the download is large (≈ 575 MB zipped,
@@ -104,8 +113,11 @@ Calibre program folder.
 ```powershell
 .venv\Scripts\python -m pip install pyinstaller
 .\build.ps1 -Zip          # -> dist\NeonConverter\NeonConverter.exe and dist\NeonConverter-windows.zip
-.\install.ps1             # optional: install for this user + shortcuts
+.\install.ps1             # optional: install for this user + shortcuts (-Uninstall removes it)
 ```
+
+The build puts the same installer into the app folder (`Install.cmd`, which runs `_internal\install.ps1`),
+so people who download the zip get it too.
 
 `build.ps1` bundles Calibre automatically: it copies an installed Calibre if you have one, otherwise it
 downloads the official Calibre MSI and unpacks it (nothing gets installed). Use `-CalibreDir <folder>` to

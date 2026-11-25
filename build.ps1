@@ -40,8 +40,33 @@ Copy-Item (Join-Path $pandocDir "pandoc.exe") (Join-Path $stage "pandoc.exe") -F
 $assets = (Resolve-Path "assets").Path
 $icon = Join-Path $assets "icon.ico"
 
+# Name and version shown in the exe's Properties, Task Manager and Settings > Apps
+$version = (& $py -c "import neonconvert; print(neonconvert.__version__)").Trim()
+$nums = (@($version.Split('.')) + @('0', '0', '0', '0'))[0..3] -join ', '
+$versionFile = Join-Path $WorkPath "version_info.txt"
+@"
+VSVersionInfo(
+  ffi=FixedFileInfo(filevers=($nums), prodvers=($nums), mask=0x3f, flags=0x0, OS=0x40004,
+                    fileType=0x1, subtype=0x0, date=(0, 0)),
+  kids=[
+    StringFileInfo([StringTable('040904B0', [
+      StringStruct('FileDescription', 'Neon Converter'),
+      StringStruct('FileVersion', '$version'),
+      StringStruct('InternalName', 'NeonConverter'),
+      StringStruct('OriginalFilename', 'NeonConverter.exe'),
+      StringStruct('ProductName', 'Neon Converter'),
+      StringStruct('ProductVersion', '$version')])]),
+    VarFileInfo([VarStruct('Translation', [1033, 1200])])
+  ]
+)
+"@ | Set-Content -Encoding Ascii $versionFile
+
+# Remove the previous build first: older builds may hold read-only Calibre files PyInstaller can't delete
+$previous = Join-Path $DistPath "NeonConverter"
+if (Test-Path $previous) { Remove-Item $previous -Recurse -Force }
+
 & $py -m PyInstaller --noconfirm --clean --windowed `
-    --name NeonConverter --icon $icon `
+    --name NeonConverter --icon $icon --version-file $versionFile `
     --distpath $DistPath --workpath $WorkPath --specpath $WorkPath `
     --add-data "$assets;assets" `
     --add-binary "$stage\ffmpeg.exe;bin" `
@@ -66,7 +91,8 @@ if (-not $NoCalibre) {
     $src = @($src)[-1]
     $dest = Join-Path $app "_internal\engines\calibre"
     Write-Host "Bundling Calibre from $src ..." -ForegroundColor Cyan
-    robocopy $src $dest /E /NFL /NDL /NJH /NJS /NP /R:1 /W:1 | Out-Null
+    # /A-:R: the MSI unpacks Calibre read-only; ship normal files so unzipping, upgrading and deleting just work
+    robocopy $src $dest /E /A-:R /NFL /NDL /NJH /NJS /NP /R:1 /W:1 | Out-Null
     if ($LASTEXITCODE -ge 8) { throw "Copying Calibre failed (robocopy $LASTEXITCODE)" }
     $global:LASTEXITCODE = 0
     $ver = (& (Join-Path $dest "ebook-convert.exe") --version | Select-Object -First 1) -replace '.*calibre\s+([\d.]+).*', '$1'
@@ -81,8 +107,12 @@ Project home: https://calibre-ebook.com  ·  https://github.com/kovidgoyal/calib
     Write-Host "Bundled calibre $ver" -ForegroundColor Cyan
 }
 
+# One-click installer for people who download the zip: "Install" next to NeonConverter.exe
+Copy-Item (Join-Path $PSScriptRoot "install.ps1") (Join-Path $app "_internal\install.ps1") -Force
+Copy-Item (Join-Path $PSScriptRoot "packaging\Install.cmd") (Join-Path $app "Install.cmd") -Force
+
 Write-Host ""
-Write-Host "Built: $app\NeonConverter.exe" -ForegroundColor Cyan
+Write-Host "Built: $app\NeonConverter.exe  (v$version)" -ForegroundColor Cyan
 
 if ($Zip) {
     $zipPath = Join-Path (Resolve-Path $DistPath).Path "NeonConverter-windows.zip"

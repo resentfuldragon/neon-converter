@@ -70,7 +70,8 @@ it tells people where to get each one's source code, which those licenses requir
 
 ## 6. What other people can do
 
-- **Download the app:** Releases → `NeonConverter-windows.zip` → unzip → run `NeonConverter.exe`.
+- **Download the app:** Releases → `NeonConverter-windows.zip` → unzip → double-click **Install** (adds
+  shortcuts and an uninstall entry in Settings → Apps), or just run `NeonConverter.exe`.
 - **Download the code:** green **Code** button → **Download ZIP**.
 - **Fork it:** **Fork** button (top right) makes their own copy to change; they can send improvements back
   with a Pull Request.
@@ -81,7 +82,8 @@ it tells people where to get each one's source code, which those licenses requir
 git add .
 git commit -m "Describe what changed"
 git push
-.\build.ps1 -Zip; gh release create v1.1.1 dist\NeonConverter-windows.zip   # optional: new download
+.\build.ps1 -Zip; gh release create v1.1.2 dist\NeonConverter-windows.zip   # optional: new download
 ```
 
-Remember to bump `__version__` in `neonconvert/__init__.py` when you tag a new version.
+Remember to bump `__version__` in `neonconvert/__init__.py` when you tag a new version — the build stamps
+it into the exe, and the installer shows it in Settings → Apps.
